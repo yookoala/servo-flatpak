@@ -2,9 +2,9 @@ name: Test Flatpak Build
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -15,18 +15,19 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Cache Servo GitHub release info
-      uses: actions/cache@v4
+    - name: Restore Servo GitHub release info cache
+      id: cache-servo-release
+      uses: actions/cache/restore@v4
       with:
         path: .servo.github.json
-        key: servo-release-${{ github.run_id }}
+        key: servo-release-${{ hashFiles('.servo.github.json') }}
         restore-keys: |
           servo-release-
 
     - name: Install Flatpak and dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y flatpak flatpak-builder
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: flatpak,flatpak-builder
     
     - name: Generate .env file with GitHub credentials
       env:
@@ -45,34 +46,41 @@ jobs:
     - name: Validate generated manifest
       run: |
         if [ ! -f org.servo.Servo.yml ]; then
-          echo "Error: org.servo.Servo.yml was not generated"
+          echo -e "\033[0;31mError: org.servo.Servo.yml was not generated\033[0m"
           exit 1
         fi
-        echo "✓ Manifest file generated successfully"
+        echo -e "\033[0;32m✓ Manifest file generated successfully\033[0m"
         
         # Check that placeholders were replaced
         if grep -q '\[RUNTIME_VERSION\]' org.servo.Servo.yml; then
-          echo "Error: RUNTIME_VERSION placeholder not replaced"
+          echo -e "\033[0;31mError: RUNTIME_VERSION placeholder not replaced\033[0m"
           exit 1
         fi
         if grep -q '\[SERVO_TAR_URL\]' org.servo.Servo.yml; then
-          echo "Error: SERVO_TAR_URL placeholder not replaced"
+          echo -e "\033[0;31mError: SERVO_TAR_URL placeholder not replaced\033[0m"
           exit 1
         fi
         if grep -q '\[SERVO_TAR_SHA256\]' org.servo.Servo.yml; then
-          echo "Error: SERVO_TAR_SHA256 placeholder not replaced"
+          echo -e "\033[0;31mError: SERVO_TAR_SHA256 placeholder not replaced\033[0m"
           exit 1
         fi
-        echo "✓ All placeholders replaced successfully"
+        echo -e "\033[0;32m✓ All placeholders replaced successfully\033[0m"
     
     - name: Build Flatpak (dry-run)
       run: |
-        flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml || true
-        echo "✓ Flatpak manifest syntax is valid"
+        flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml
+        echo -e "\033[0;32m✓ Flatpak manifest syntax is valid\033[0m"
+    
+    - name: Save Servo GitHub release info cache
+      uses: actions/cache/save@v4
+      if: always()
+      with:
+        path: .servo.github.json
+        key: servo-release-${{ hashFiles('.servo.github.json') }}
     
     - name: Upload generated manifest as artifact
       uses: actions/upload-artifact@v4
       with:
         name: servo-flatpak-manifest
         path: org.servo.Servo.yml
-        retention-days: 7
+        retention-days: 1
