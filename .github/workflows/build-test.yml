@@ -15,11 +15,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Cache Servo GitHub release info
-      uses: actions/cache@v4
+    - name: Restore Servo GitHub release info cache
+      id: cache-servo-release
+      uses: actions/cache/restore@v4
       with:
         path: .servo.github.json
-        key: servo-release-${{ github.run_id }}
+        key: servo-release-${{ hashFiles('.servo.github.json') }}
         restore-keys: |
           servo-release-
 
@@ -70,9 +71,16 @@ jobs:
         flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml || true
         echo "✓ Flatpak manifest syntax is valid"
     
+    - name: Save Servo GitHub release info cache
+      uses: actions/cache/save@v4
+      if: always()
+      with:
+        path: .servo.github.json
+        key: servo-release-${{ hashFiles('.servo.github.json') }}
+    
     - name: Upload generated manifest as artifact
       uses: actions/upload-artifact@v4
       with:
         name: servo-flatpak-manifest
         path: org.servo.Servo.yml
-        retention-days: 7
+        retention-days: 1
