@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Servo
+Exec=servo %U
+Terminal=false
+Type=Application
+Icon=org.servo.Servo
+StartupWMClass=Servo
+Comment=Demo browser of the Servo browser engine
+MimeType=text/html;text/xml;application/xhtml+xml;application/vnd.mozilla.xul+xml;text/mml;x-scheme-handler/http;x-scheme-handler/https;
+Categories=Network;WebBrowser;
+X-Desktop-File-Install-Version=0.1

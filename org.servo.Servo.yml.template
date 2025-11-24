@@ -3,6 +3,7 @@ runtime: org.freedesktop.Platform
 runtime-version: '[RUNTIME_VERSION]'
 sdk: org.freedesktop.Sdk
 command: /app/bin/servo
+rename-icon: servo
 finish-args:
   - --socket=wayland
   - --socket=x11
@@ -14,9 +15,20 @@ modules:
   - name: servo
     buildsystem: simple
     build-commands:
-      - install -Dm755 servo /app/bin/servo
-      - cp -r resources /app/bin/
+      - install -Dm0755 servo "${FLATPAK_DEST}/bin/servo"
+      - cp -r resources "${FLATPAK_DEST}/bin/"
+      - install -Dm0644 "org.servo.Servo.metainfo.xml" "${FLATPAK_DEST}/share/metainfo/org.servo.Servo.metainfo.xml"
+      - install -Dm0644 "org.servo.Servo.desktop" "${FLATPAK_DEST}/share/applications/org.servo.Servo.desktop"
+      - |
+        for size in 64; do
+          install -Dm0644 "resources/servo_${size}.png" "${FLATPAK_DEST}/share/icons/hicolor/${size}x${size}/apps/servo.png"
+        done
+      - install -Dm0644 "resources/servo.svg" "${FLATPAK_DEST}/share/icons/scalable/apps/servo.svg"
     sources:
       - type: archive
         url: [SERVO_TAR_URL]
         sha256: [SERVO_TAR_SHA256]
+      - type: file
+        path: org.servo.Servo.metainfo.xml
+      - type: file
+        path: org.servo.Servo.desktop
