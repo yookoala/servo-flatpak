@@ -46,25 +46,25 @@ jobs:
     - name: Validate generated manifest
       run: |
         if [ ! -f org.servo.Servo.yml ]; then
-          echo "Error: org.servo.Servo.yml was not generated"
+          echo -e "\033[0;31mError: org.servo.Servo.yml was not generated\033[0m"
           exit 1
         fi
-        echo "✓ Manifest file generated successfully"
+        echo -e "\033[0;32m✓ Manifest file generated successfully\033[0m"
         
         # Check that placeholders were replaced
         if grep -q '\[RUNTIME_VERSION\]' org.servo.Servo.yml; then
-          echo "Error: RUNTIME_VERSION placeholder not replaced"
+          echo -e "\033[0;31mError: RUNTIME_VERSION placeholder not replaced\033[0m"
           exit 1
         fi
         if grep -q '\[SERVO_TAR_URL\]' org.servo.Servo.yml; then
-          echo "Error: SERVO_TAR_URL placeholder not replaced"
+          echo -e "\033[0;31mError: SERVO_TAR_URL placeholder not replaced\033[0m"
           exit 1
         fi
         if grep -q '\[SERVO_TAR_SHA256\]' org.servo.Servo.yml; then
-          echo "Error: SERVO_TAR_SHA256 placeholder not replaced"
+          echo -e "\033[0;31mError: SERVO_TAR_SHA256 placeholder not replaced\033[0m"
           exit 1
         fi
-        echo "✓ All placeholders replaced successfully"
+        echo -e "\033[0;32m✓ All placeholders replaced successfully\033[0m"
     
     - name: Build Flatpak (dry-run)
       run: |
