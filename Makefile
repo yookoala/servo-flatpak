@@ -15,7 +15,7 @@ install-runtime:
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
-install: org.servo.Servo.yml
+install: org.servo.Servo.yml install-runtime
 	@echo -e "\033[0;36mBuilding and installing the Flatpak package...\033[0m"
 	@flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
 	@echo -e "\033[0;32mDone\033[0m"
