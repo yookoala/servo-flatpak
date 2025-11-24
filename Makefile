@@ -9,8 +9,9 @@ SERVO_LATEST_SHA256 = $(shell curl -Ls $(SERVO_LATEST_SHA256_URL) | cut -d' ' -f
 all: install
 
 install-runtime:
-	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version $(FREEDESKTOP_LATEST_VERSION)...\033[0m"
+	@echo -e "\033[0;36mSetup flathub ...\033[0m"
 	@flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version $(FREEDESKTOP_LATEST_VERSION)...\033[0m"
 	@flatpak install --user -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION)
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
