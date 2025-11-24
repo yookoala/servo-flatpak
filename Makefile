@@ -1,22 +1,26 @@
 SHELL := /bin/bash
 
 # Lazy evaluated latest version informations
-FREEDESKTOP_LATEST_VERSION = $(shell flatpak --user remote-ls flathub | grep "org.freedesktop.Platform\s" | grep -v "\.Locale\|\.Debug\|\.Var" | tail -1 | awk '{print $$NF}')
+FREEDESKTOP_LATEST_VERSION = $(shell flatpak --user remote-ls flathub | grep "org.freedesktop.Platform\s" | grep -v "\.Locale\|\.Debug\|\.Var" | cut -f 4 | tail -1)
 SERVO_LATEST_TAR = $(shell grep "browser_download_url.*servo-x86_64-linux-gnu.tar.gz\"" .servo.github.json | cut -d '"' -f 4 | head -1)
 SERVO_LATEST_SHA256_URL = $(shell grep "browser_download_url.*servo-x86_64-linux-gnu.tar.gz.sha256\"" .servo.github.json | cut -d '"' -f 4 | head -1 )
 SERVO_LATEST_SHA256 = $(shell curl -Ls $(SERVO_LATEST_SHA256_URL) | cut -d' ' -f1)
 
 all: install
 
-install-runtime:
+install-flathub:
 	@echo -e "\033[0;36mSetup flathub ...\033[0m"
 	@flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version $(FREEDESKTOP_LATEST_VERSION)...\033[0m"
-	@flatpak install --user -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION)
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
-install: org.servo.Servo.yml install-runtime
+install-runtime: install-flathub
+	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version (version: $(FREEDESKTOP_LATEST_VERSION))...\033[0m"
+	@flatpak install --user --noninteractive -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION)
+	@echo -e "\033[0;32mDone\033[0m"
+	@echo
+
+install: org.servo.Servo.yml
 	@echo -e "\033[0;36mBuilding and installing the Flatpak package...\033[0m"
 	@flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
 	@echo -e "\033[0;32mDone\033[0m"
@@ -63,4 +67,4 @@ clean:
 	@rm -f org.servo.Servo.yml
 	@echo
 
-.PHONY: all clean install install-runtime
+.PHONY: all clean install install-runtime install-flathub
