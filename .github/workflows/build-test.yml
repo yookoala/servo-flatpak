@@ -24,9 +24,9 @@ jobs:
           servo-release-
 
     - name: Install Flatpak and dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y flatpak flatpak-builder
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: flatpak,flatpak-builder
     
     - name: Generate .env file with GitHub credentials
       env:
