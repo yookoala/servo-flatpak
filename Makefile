@@ -15,8 +15,8 @@ install-flathub:
 	@echo
 
 install-runtime: install-flathub
-	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version (version: $(FREEDESKTOP_LATEST_VERSION))...\033[0m"
-	@flatpak install --user --noninteractive -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION)
+	@echo -e "\033[0;36mInstalling Freedesktop Platform runtime and sdk (version: $(FREEDESKTOP_LATEST_VERSION))...\033[0m"
+	@flatpak install --user --noninteractive -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION) org.freedesktop.Sdk//$(FREEDESKTOP_LATEST_VERSION)
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
