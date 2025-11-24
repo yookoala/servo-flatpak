@@ -1,0 +1,10 @@
+# Intermediate or optionally dependent files
+/.env
+/.servo.github.json
+
+# Generated Flatpak manifest
+/org.servo.Servo.yml
+
+# Build directories
+/.flatpak-builder/
+/build-dir/

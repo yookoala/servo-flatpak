@@ -1,0 +1,22 @@
+id: org.servo.Servo
+runtime: org.freedesktop.Platform
+runtime-version: '[RUNTIME_VERSION]'
+sdk: org.freedesktop.Sdk
+command: /app/bin/servo
+finish-args:
+  - --socket=wayland
+  - --socket=x11
+  - --share=ipc
+  - --share=network
+  - --device=dri  
+  - --socket=pulseaudio
+modules:
+  - name: servo
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 servo /app/bin/servo
+      - cp -r resources /app/bin/
+    sources:
+      - type: archive
+        url: [SERVO_TAR_URL]
+        sha256: [SERVO_TAR_SHA256]
