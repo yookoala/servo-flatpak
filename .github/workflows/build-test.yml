@@ -68,8 +68,8 @@ jobs:
     
     - name: Build Flatpak (dry-run)
       run: |
-        flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml || true
-        echo "✓ Flatpak manifest syntax is valid"
+        flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml
+        echo -e "\033[0;32m✓ Flatpak manifest syntax is valid\033[0m"
     
     - name: Save Servo GitHub release info cache
       uses: actions/cache/save@v4
