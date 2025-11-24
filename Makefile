@@ -8,6 +8,13 @@ SERVO_LATEST_SHA256 = $(shell curl -Ls $(SERVO_LATEST_SHA256_URL) | cut -d' ' -f
 
 all: install
 
+install-runtime:
+	@echo -e "\033[0;36mInstalling/Updating Freedesktop Platform runtime version $(FREEDESKTOP_LATEST_VERSION)...\033[0m"
+	@flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+	@flatpak install --user -y flathub org.freedesktop.Platform//$(FREEDESKTOP_LATEST_VERSION)
+	@echo -e "\033[0;32mDone\033[0m"
+	@echo
+
 install: org.servo.Servo.yml
 	@echo -e "\033[0;36mBuilding and installing the Flatpak package...\033[0m"
 	@flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
@@ -37,7 +44,7 @@ install: org.servo.Servo.yml
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
-org.servo.Servo.yml: .servo.github.json
+org.servo.Servo.yml: .servo.github.json install-runtime
 	@echo -e "\033[0;36mGenerating org.servo.Servo.yml from template...\033[0m"
 	@cp org.servo.Servo.yml.template org.servo.Servo.yml
 	@echo Fill in org.servo.Servo.yml with latest versions: $(FREEDESKTOP_LATEST_VERSION) ...
@@ -55,4 +62,4 @@ clean:
 	@rm -f org.servo.Servo.yml
 	@echo
 
-.PHONY: all clean install
+.PHONY: all clean install install-runtime
