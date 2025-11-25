@@ -15,8 +15,24 @@ You need these installed to build the Flatpak:
 * `flatpak-builder` - Tool to build Flatpak applications
 * `curl` - For downloading from GitHub API
 * `make` - For running the build automation
-* Flathub repository configured (run: `flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo`)
 
+### Installation
+
+<details>
+<summary>Ubuntu / Debian</summary>
+
+```bash
+apt-get install curl flatpak flatpak-builder make
+```
+</details>
+
+<details>
+<summary>Fedora / CentOS / RHEL</summary>
+
+```bash
+dnf install curl flatpak flatpak-builder make
+```
+</details>
 
 ## Usage
 
