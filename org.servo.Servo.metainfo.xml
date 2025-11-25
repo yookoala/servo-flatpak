@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>org.servo.Servo</id>
+  <name>Servo</name>
+  <project_license>MPL-2.0</project_license>
+  <developer_name>The Servo Project</developer_name>
+  <summary>Demo browser of the experimental web browser engine</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <url type="homepage">https://servo.org/</url>
+  <url type="bugtracker">https://github.com/servo/servo/issues</url>
+  <url type="help">https://servo.org/docs/</url>
+  <url type="vcs-browser">https://github.com/servo/servo</url>
+  <description>
+    <p>
+      Servo is an experimental web browser engine designed for applications including embedded use.
+      Written in Rust, it's being developed on 64-bit macOS, 64-bit Linux, 64-bit Windows, and Android.
+    </p>
+    <p>
+      Servo is built on top of Rust to provide a secure and reliable foundation. It leverages the
+      memory safety guarantees of Rust to help avoid common browser vulnerabilities. The project aims
+      to create a highly parallel browser engine that takes advantage of modern multi-core processors.
+    </p>
+    <p>
+      This is a testing build packaged as Flatpak for easy installation and distribution. It fetches
+      the latest Servo release automatically and packages it for Linux systems.
+    </p>
+    <p>
+      Note: Servo is experimental software and may not work with all websites. It is primarily
+      intended for developers and testers who want to explore the future of browser engine technology.
+    </p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Servo browser window</caption>
+      <image type="source">https://servo.org/img/home-servo-hero.png</image>
+    </screenshot>
+  </screenshots>
+  <launchable type="desktop-id">org.servo.Servo.desktop</launchable>
+  <content_rating type="oars-1.1">
+    <content_attribute id="drugs-alcohol">none</content_attribute>
+    <content_attribute id="drugs-narcotics">none</content_attribute>
+    <content_attribute id="drugs-tobacco">none</content_attribute>
+    <content_attribute id="sex-nudity">none</content_attribute>
+    <content_attribute id="sex-themes">none</content_attribute>
+    <content_attribute id="sex-homosexuality">none</content_attribute>
+    <content_attribute id="sex-prostitution">none</content_attribute>
+    <content_attribute id="sex-adultery">none</content_attribute>
+    <content_attribute id="sex-appearance">none</content_attribute>
+    <content_attribute id="language-profanity">none</content_attribute>
+    <content_attribute id="language-humor">none</content_attribute>
+    <content_attribute id="language-discrimination">none</content_attribute>
+    <content_attribute id="social-chat">intense</content_attribute>
+    <content_attribute id="social-info">none</content_attribute>
+    <content_attribute id="social-audio">intense</content_attribute>
+    <content_attribute id="social-location">none</content_attribute>
+    <content_attribute id="social-contacts">intense</content_attribute>
+    <content_attribute id="money-purchasing">none</content_attribute>
+    <content_attribute id="money-gambling">none</content_attribute>
+  </content_rating>
+  <provides>
+    <id>org.servo.Servo</id>
+  </provides>
+  <update_contact>koalay@gmail.com</update_contact>
+</component>
