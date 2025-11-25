@@ -51,7 +51,7 @@ install: org.servo.Servo.yml
 
 org.servo.Servo.yml: .servo.github.json install-runtime
 	@echo -e "\033[0;36mGenerating org.servo.Servo.yml from template...\033[0m"
-	@cp org.servo.Servo.yml.template org.servo.Servo.yml
+	@cp org.servo.Servo.template.yml org.servo.Servo.yml
 	@echo Fill in org.servo.Servo.yml with latest versions: $(FREEDESKTOP_LATEST_VERSION) ...
 	@sed -i "s/\[RUNTIME_VERSION\]/$(FREEDESKTOP_LATEST_VERSION)/g" org.servo.Servo.yml
 	@echo Servo latest tarball URL: $(SERVO_LATEST_TAR) ...
