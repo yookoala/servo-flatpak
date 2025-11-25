@@ -1,8 +1,12 @@
 # Servo Flatpak
 
+[![Test Flatpak Build][badge-github-build-test]][link-github-build-test]
+
 This is a simple setup to download and build a Flatpak package for the latest Servo
 testing binary.
 
+[badge-github-build-test]: https://github.com/yookoala/servo-flatpak/actions/workflows/build-test.yml/badge.svg?branch=main
+[link-github-build-test]: https://github.com/yookoala/servo-flatpak/actions/workflows/build-test.yml?query=branch%3Amain
 
 ## Prerequisites
 
