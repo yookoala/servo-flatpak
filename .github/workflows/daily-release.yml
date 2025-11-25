@@ -1,0 +1,146 @@
+name: Daily Release Check
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y flatpak flatpak-builder curl jq
+    
+    - name: Add Flathub repository
+      run: |
+        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+    - name: Check latest Servo release
+      id: check-release
+      run: |
+        # Get latest Servo release info
+        LATEST_RELEASE=$(curl -sL https://api.github.com/repos/servo/servo/releases/latest)
+        SERVO_VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name')
+        SERVO_NAME=$(echo "$LATEST_RELEASE" | jq -r '.name')
+        
+        echo "servo_version=$SERVO_VERSION" >> $GITHUB_OUTPUT
+        echo "servo_name=$SERVO_NAME" >> $GITHUB_OUTPUT
+        echo "Latest Servo release: $SERVO_VERSION ($SERVO_NAME)"
+        
+        # Check if we already have this release
+        if git ls-remote --tags origin | grep -q "refs/tags/$SERVO_VERSION"; then
+          echo "release_exists=true" >> $GITHUB_OUTPUT
+          echo "Release $SERVO_VERSION already exists, skipping..."
+        else
+          echo "release_exists=false" >> $GITHUB_OUTPUT
+          echo "New release $SERVO_VERSION found, proceeding..."
+        fi
+    
+    - name: Cache Servo release info
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        curl -sL https://api.github.com/repos/servo/servo/releases/latest -o .servo.github.json
+    
+    - name: Generate manifest
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        make org.servo.Servo.yml
+    
+    - name: Validate generated manifest
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        if [ ! -f org.servo.Servo.yml ]; then
+          echo "Error: org.servo.Servo.yml was not generated"
+          exit 1
+        fi
+        
+        # Check that placeholders were replaced
+        if grep -q '\[RUNTIME_VERSION\]' org.servo.Servo.yml; then
+          echo "Error: RUNTIME_VERSION placeholder not replaced"
+          exit 1
+        fi
+        if grep -q '\[SERVO_TAR_URL\]' org.servo.Servo.yml; then
+          echo "Error: SERVO_TAR_URL placeholder not replaced"
+          exit 1
+        fi
+        if grep -q '\[SERVO_TAR_SHA256\]' org.servo.Servo.yml; then
+          echo "Error: SERVO_TAR_SHA256 placeholder not replaced"
+          exit 1
+        fi
+        
+        echo "✓ Manifest validation passed"
+    
+    - name: Configure Git
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Create release branch and commit
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        SERVO_VERSION="${{ steps.check-release.outputs.servo_version }}"
+        SERVO_NAME="${{ steps.check-release.outputs.servo_name }}"
+        
+        # Check if release branch exists, create if not
+        if git ls-remote --heads origin release | grep -q release; then
+          git fetch origin release
+          git checkout release
+        else
+          git checkout -b release
+        fi
+        
+        # Add the generated manifest
+        git add org.servo.Servo.yml
+        git commit -m "Release $SERVO_VERSION" -m "Automated release for Servo $SERVO_NAME" -m "Generated manifest for Flatpak packaging."
+        
+        # Tag the commit
+        git tag -a "$SERVO_VERSION" -m "Servo $SERVO_NAME"
+        
+        # Push branch and tag
+        git push origin release
+        git push origin "$SERVO_VERSION"
+    
+    - name: Create GitHub Release
+      if: steps.check-release.outputs.release_exists == 'false'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.check-release.outputs.servo_version }}
+        name: Servo ${{ steps.check-release.outputs.servo_name }}
+        body: |
+          Automated Flatpak manifest for Servo ${{ steps.check-release.outputs.servo_name }}
+          
+          This release contains the `org.servo.Servo.yml` manifest file that can be used to build a Flatpak package of Servo.
+          
+          **Upstream Release:** https://github.com/servo/servo/releases/tag/${{ steps.check-release.outputs.servo_version }}
+          
+          ## Usage
+          
+          To build and install the Flatpak:
+          
+          ```bash
+          flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
+          ```
+          
+          To run Servo:
+          
+          ```bash
+          flatpak run org.servo.Servo
+          ```
+        files: |
+          org.servo.Servo.yml
+        draft: false
+        prerelease: false
