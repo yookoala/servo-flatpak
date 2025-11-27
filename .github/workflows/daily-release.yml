@@ -9,6 +9,9 @@ on:
 permissions:
   contents: write
 
+env:
+  RELEASE_BRANCH: release
+
 jobs:
   check-and-release:
     runs-on: ubuntu-latest
@@ -46,7 +49,7 @@ jobs:
           echo "Release $SERVO_VERSION already exists, skipping..."
         else
           echo "release_exists=false" >> $GITHUB_OUTPUT
-          echo "New release $SERVO_VERSION found, proceeding..."
+          echo -e "\033[32mNew release $SERVO_VERSION found, proceeding...\033[0m"
         fi
     
     - name: Cache Servo release info
@@ -100,16 +103,21 @@ jobs:
       run: |
         SERVO_VERSION="${{ steps.check-release.outputs.servo_version }}"
         SERVO_NAME="${{ steps.check-release.outputs.servo_name }}"
-        
+        BRANCH="${{ env.RELEASE_BRANCH }}"
+
         # Check if release branch exists, create if not
-        if git ls-remote --heads origin release | grep -q release; then
-          git fetch origin release
-          git checkout release
+        echo -e "\033[34mChecking if release branch \"${BRANCH}\" exists...\033[0m"
+        if git ls-remote --heads origin ${BRANCH} | grep -q " ref/heads/${BRANCH}\$" 2>/dev/null; then
+          echo -e "\033[34mRelease branch exists, checking out...\033[0m"
+          git fetch origin ${BRANCH}
+          git checkout ${BRANCH}
         else
-          git checkout -b release
+          echo -e "\033[34mRelease branch does not exist, creating...\033[0m"
+          git checkout -b ${BRANCH}
         fi
         
         # Add the generated manifest
+        echo -e "\033[34mAdding generated manifest to branch...\033[0m"
         git add dist/org.servo.Servo.yml
         git commit -m "Release $SERVO_VERSION" -m "Automated release for Servo $SERVO_NAME" -m "Generated manifest for Flatpak packaging."
         
@@ -117,7 +125,7 @@ jobs:
         git tag -a "$SERVO_VERSION" -m "Servo $SERVO_NAME"
         
         # Push branch and tag
-        git push origin release
+        git push origin ${BRANCH}
         git push origin "$SERVO_VERSION"
     
     - name: Create GitHub Release
