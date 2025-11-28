@@ -161,7 +161,7 @@ jobs:
           To build and install the Flatpak:
           
           ```bash
-          curl -L https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
+          curl -Ls -o org.servo.Servo.yml https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
           echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check \
             && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml \
             || echo -e "\033[31mchecksum mismatch\033[0m"
