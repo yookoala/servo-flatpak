@@ -5,6 +5,10 @@
 # Generated Flatpak manifest
 /org.servo.Servo.yml
 
+# Generated icons package
+/icons.tar.gz
+/icons.tar.gz.sha384sum
+
 # Build directories
 /.flatpak-builder/
 /build-dir/

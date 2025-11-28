@@ -61,6 +61,16 @@ org.servo.Servo.yml: .servo.github.json install-runtime
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
+icons.tar.gz:
+	@echo -e "\033[0;36mCreating icons.tar.gz archive...\033[0m"
+	@if [ ! -d icons ]; then \
+		echo -e "Generating icons..."; \
+		make icons; \
+	fi
+	@tar -czf icons.tar.gz -C icons .
+	@echo -e "\033[0;32mDone\033[0m"
+	@echo
+
 icons: icons/servo_16.png icons/servo_32.png icons/servo_48.png icons/servo_64.png icons/servo_128.png icons/servo_256.png icons/servo_512.png
 	@echo -e "\033[0;32mAll icons generated successfully.\033[0m"
 	@echo
