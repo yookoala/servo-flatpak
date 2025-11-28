@@ -98,6 +98,14 @@ jobs:
         mkdir -p dist
         cp -pdf org.servo.Servo.yml dist/
 
+    - name: Get the SHA3384 checksum for the yml
+      if: steps.check-release.outputs.release_exists == 'false'
+      id: sha384sum
+      run: |
+        cd dist/
+        sha384sum org.servo.Servo.yml > org.servo.Servo.yml.sha384sum
+        echo "checksum=$(cat org.servo.Servo.yml.sha384sum)" >> $GITHUB_OUTPUT
+
     - name: Create release branch and commit
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
@@ -119,6 +127,7 @@ jobs:
         # Add the generated manifest
         echo -e "\033[34mAdding generated manifest to branch...\033[0m"
         git add dist/org.servo.Servo.yml
+        git add dist/org.servo.Servo.yml.sha384sum
         git commit -m "Release $SERVO_VERSION" -m "Automated release for Servo $SERVO_NAME" -m "Generated manifest for Flatpak packaging."
         
         # Tag the commit
@@ -127,7 +136,7 @@ jobs:
         # Push branch and tag
         git push origin ${BRANCH}
         git push origin "$SERVO_VERSION"
-    
+
     - name: Create GitHub Release
       if: steps.check-release.outputs.release_exists == 'false'
       uses: softprops/action-gh-release@v1
@@ -146,14 +155,25 @@ jobs:
           To build and install the Flatpak:
           
           ```bash
-          flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
+          curl -L https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
+          echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check \
+            && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml \
+            || echo -e "\033[31mchecksum mismatch\033[0m"
           ```
-          
-          To run Servo:
-          
+
+          This will download the [manifest file][manifest-file]. And it will download the
+          [${{ steps.check-release.outputs.servo_version }} tag release from the upstream GitHub][upstream-github].
+
+          To run Servo after installation:
+
           ```bash
           flatpak run org.servo.Servo
           ```
+
+          or use the relevant flatpak desktop shortcut.
+
+          [manifest-file]: https://raw.githubusercontent.com/yookoala/servo-flatpak/refs/tags/${{ steps.check-release.outputs.servo_version }}/dist/org.servo.Servo.yml
+          [upstream-github]: https://github.com/servo/servo/releases/tag/${{ steps.check-release.outputs.servo_version }}
         files: |
           dist/org.servo.Servo.yml
         draft: false
