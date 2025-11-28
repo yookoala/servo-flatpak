@@ -8,3 +8,6 @@
 # Build directories
 /.flatpak-builder/
 /build-dir/
+
+# Temporary folder
+/temp

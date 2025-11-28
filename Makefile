@@ -61,10 +61,53 @@ org.servo.Servo.yml: .servo.github.json install-runtime
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
+icons: icons/servo_16.png icons/servo_32.png icons/servo_48.png icons/servo_64.png icons/servo_128.png icons/servo_256.png icons/servo_512.png
+	@echo -e "\033[0;32mAll icons generated successfully.\033[0m"
+	@echo
+
+icons/servo_1024.png: temp/servo-x86_64-linux-gnu.tar.gz
+	@if [ ! -d icons ]; then \
+		echo -e "Creating icons directory..."; \
+		mkdir -p icons; \
+	fi
+	@if [ ! -f icons/servo_1024.png ]; then \
+		echo -e "\033[0;36mGet the latest servo_1024.png\033[0m"; \
+		cp -pdf temp/servo/resources/servo_1024.png icons/servo_1024.png; \
+	fi
+
+icons/servo_%.png: icons/servo_1024.png check-magick
+	@size=$*; \
+	echo -e "\033[0;36mGenerated icon size: $${size}x$${size}\033[0m"; \
+	magick icons/servo_1024.png -resize $${size}x$${size} icons/servo_$${size}.png && \
+	echo -e "\033[0;32m✓\033[0m success"
+
+temp/servo/resources/servo_1024.png: temp/servo-x86_64-linux-gnu.tar.gz
+	@echo -e "\033[0;36mExtracting Servo resources...\033[0m"
+	cd temp && tar -xzf servo-x86_64-linux-gnu.tar.gz
+
+temp/servo-x86_64-linux-gnu.tar.gz:
+	@echo -e "\033[0;36mDownloading and extracting Servo icons...\033[0m"
+	@mkdir -p temp
+	cd temp && curl -Ls ${SERVO_LATEST_TAR} -o servo-x86_64-linux-gnu.tar.gz
+
+check-magick:
+	@echo -e "\033[0;36mCheck if \"magick\" command from ImageMagick is available...\033[0m"
+	@if ! command -v magick &> /dev/null; then \
+		@echo -e "\033[0;31m\"magick\" command not found. Please install ImageMagick to proceed.\033[0m"; \
+		exit 1; \
+	else \
+		echo -e "\"magick\" command found."; \
+	fi
+
+clean-icons:
+	@echo -e "\033[0;36mCleaning up icons...\033[0m"
+	@rm -Rf icons/*
+
 clean:
 	@echo -e "\033[0;36mCleaning up...\033[0m"
 	@rm -f .servo.github.json
 	@rm -f org.servo.Servo.yml
+	@rm -f temp/
 	@echo
 
-.PHONY: all clean install install-runtime install-flathub
+.PHONY: all clean clean-icons check-magick icons install install-runtime install-flathub
