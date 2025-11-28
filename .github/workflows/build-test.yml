@@ -67,9 +67,15 @@ jobs:
           exit 1
         fi
         echo -e "\033[0;32m✓ All placeholders replaced successfully\033[0m"
-    
+
+        echo -e "\033[0;36mGenerated org.servo.Servo.yml content:\033[0m"
+        cat org.servo.Servo.yml
+
     - name: Build Flatpak (dry-run)
       run: |
+        make install-runtime
+
+        echo -e "\033[0;36mBuilding package with the Flatpak manifest (dry-run)...\033[0m"
         flatpak-builder --disable-download --stop-at=servo build-dir org.servo.Servo.yml
         echo -e "\033[0;32m✓ Flatpak manifest syntax is valid\033[0m"
     
