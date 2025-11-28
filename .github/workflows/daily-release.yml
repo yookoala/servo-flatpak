@@ -106,6 +106,12 @@ jobs:
         sha384sum org.servo.Servo.yml > org.servo.Servo.yml.sha384sum
         echo "checksum=$(cat org.servo.Servo.yml.sha384sum)" >> $GITHUB_OUTPUT
 
+    - name: Creating icons.tar.gz archive
+      if: steps.check-release.outputs.release_exists == 'false'
+      run: |
+        make icons.tar.gz
+        sha384sum icons.tar.gz > icons.tar.gz.sha384sum
+
     - name: Create release branch and commit
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
@@ -115,7 +121,7 @@ jobs:
 
         # Check if release branch exists, create if not
         echo -e "\033[34mChecking if release branch \"${BRANCH}\" exists...\033[0m"
-        if git ls-remote --heads origin ${BRANCH} | grep -q " ref/heads/${BRANCH}\$" 2>/dev/null; then
+        if git ls-remote --heads origin ${BRANCH} | grep " refs/heads/${BRANCH}\$" 2>/dev/null; then
           echo -e "\033[34mRelease branch exists, checking out...\033[0m"
           git fetch origin ${BRANCH}
           git checkout ${BRANCH}
@@ -155,7 +161,7 @@ jobs:
           To build and install the Flatpak:
           
           ```bash
-          curl -L https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
+          curl -Ls -o org.servo.Servo.yml https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
           echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check \
             && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml \
             || echo -e "\033[31mchecksum mismatch\033[0m"
@@ -176,5 +182,8 @@ jobs:
           [upstream-github]: https://github.com/servo/servo/releases/tag/${{ steps.check-release.outputs.servo_version }}
         files: |
           dist/org.servo.Servo.yml
+          dist/org.servo.Servo.yml.sha384sum
+          icons.tar.gz
+          icons.tar.gz.sha384sum
         draft: false
         prerelease: false

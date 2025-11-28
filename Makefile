@@ -20,7 +20,7 @@ install-runtime: install-flathub
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
-install: org.servo.Servo.yml
+install: org.servo.Servo.yml install-runtime
 	@echo -e "\033[0;36mBuilding and installing the Flatpak package...\033[0m"
 	@flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml
 	@echo -e "\033[0;32mDone\033[0m"
@@ -49,7 +49,7 @@ install: org.servo.Servo.yml
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
-org.servo.Servo.yml: .servo.github.json install-runtime
+org.servo.Servo.yml: .servo.github.json install-flathub
 	@echo -e "\033[0;36mGenerating org.servo.Servo.yml from template...\033[0m"
 	@cp org.servo.Servo.template.yml org.servo.Servo.yml
 	@echo Fill in org.servo.Servo.yml with latest versions: $(FREEDESKTOP_LATEST_VERSION) ...
@@ -58,6 +58,16 @@ org.servo.Servo.yml: .servo.github.json install-runtime
 	@sed -i "s|\[SERVO_TAR_URL\]|$(SERVO_LATEST_TAR)|g" org.servo.Servo.yml
 	@echo Servo latest sha256: $(SERVO_LATEST_SHA256) ...
 	@sed -i "s|\[SERVO_TAR_SHA256\]|$(SERVO_LATEST_SHA256)|g" org.servo.Servo.yml
+	@echo -e "\033[0;32mDone\033[0m"
+	@echo
+
+icons.tar.gz:
+	@echo -e "\033[0;36mCreating icons.tar.gz archive...\033[0m"
+	@if [ ! -d icons ]; then \
+		echo -e "Generating icons..."; \
+		make icons; \
+	fi
+	@tar -czf icons.tar.gz -C icons .
 	@echo -e "\033[0;32mDone\033[0m"
 	@echo
 
