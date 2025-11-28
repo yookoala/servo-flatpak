@@ -121,7 +121,7 @@ jobs:
 
         # Check if release branch exists, create if not
         echo -e "\033[34mChecking if release branch \"${BRANCH}\" exists...\033[0m"
-        if git ls-remote --heads origin ${BRANCH} | grep -q " ref/heads/${BRANCH}\$" 2>/dev/null; then
+        if git ls-remote --heads origin ${BRANCH} | grep " refs/heads/${BRANCH}\$" 2>/dev/null; then
           echo -e "\033[34mRelease branch exists, checking out...\033[0m"
           git fetch origin ${BRANCH}
           git checkout ${BRANCH}
