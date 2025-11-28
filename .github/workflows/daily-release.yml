@@ -162,13 +162,10 @@ jobs:
           
           ```bash
           curl -Ls -o org.servo.Servo.yml https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
-          echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check \
-            && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml \
-            || echo -e "\033[31mchecksum mismatch\033[0m"
+          echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml || echo -e "\033[31mchecksum mismatch\033[0m"
           ```
 
-          This will download the [manifest file][manifest-file]. And it will download the
-          [${{ steps.check-release.outputs.servo_version }} tag release from the upstream GitHub][upstream-github].
+          This will download the [manifest file][manifest-file]. And it will download the [${{ steps.check-release.outputs.servo_version }} tag release from the upstream GitHub][upstream-github].
 
           To run Servo after installation:
 
