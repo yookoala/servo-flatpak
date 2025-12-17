@@ -1,0 +1,34 @@
+id: org.servo.Servo
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: /app/bin/servo
+rename-icon: servo
+finish-args:
+  - --socket=wayland
+  - --socket=x11
+  - --share=ipc
+  - --share=network
+  - --device=dri
+  - --socket=pulseaudio
+modules:
+  - name: servo
+    buildsystem: simple
+    build-commands:
+      - install -Dm0755 servo "${FLATPAK_DEST}/bin/servo"
+      - cp -r resources "${FLATPAK_DEST}/bin/"
+      - install -Dm0644 "org.servo.Servo.metainfo.xml" "${FLATPAK_DEST}/share/metainfo/org.servo.Servo.metainfo.xml"
+      - install -Dm0644 "org.servo.Servo.desktop" "${FLATPAK_DEST}/share/applications/org.servo.Servo.desktop"
+      - |
+        for size in 64; do
+          install -Dm0644 "resources/servo_${size}.png" "${FLATPAK_DEST}/share/icons/hicolor/${size}x${size}/apps/servo.png"
+        done
+      - install -Dm0644 "resources/servo.svg" "${FLATPAK_DEST}/share/icons/scalable/apps/servo.svg"
+    sources:
+      - type: archive
+        url: https://github.com/servo/servo/releases/download/v0.0.2/servo-x86_64-linux-gnu.tar.gz
+        sha256: f10a9c5e71f16511a4722c254aa2c7a5d1b920a4c20583d22a8b68070512e2c0
+      - type: file
+        path: org.servo.Servo.metainfo.xml
+      - type: file
+        path: org.servo.Servo.desktop

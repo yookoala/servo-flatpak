@@ -15,22 +15,22 @@ env:
 jobs:
   check-and-release:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y flatpak flatpak-builder curl jq
-    
+
     - name: Add Flathub repository
       run: |
         flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    
+
     - name: Check latest Servo release
       id: check-release
       run: |
@@ -38,11 +38,11 @@ jobs:
         LATEST_RELEASE=$(curl -sL https://api.github.com/repos/servo/servo/releases/latest)
         SERVO_VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name')
         SERVO_NAME=$(echo "$LATEST_RELEASE" | jq -r '.name')
-        
+
         echo "servo_version=$SERVO_VERSION" >> $GITHUB_OUTPUT
         echo "servo_name=$SERVO_NAME" >> $GITHUB_OUTPUT
         echo "Latest Servo release: $SERVO_VERSION ($SERVO_NAME)"
-        
+
         # Check if we already have this release
         if git ls-remote --tags origin | grep -q "refs/tags/$SERVO_VERSION"; then
           echo "release_exists=true" >> $GITHUB_OUTPUT
@@ -51,7 +51,7 @@ jobs:
           echo "release_exists=false" >> $GITHUB_OUTPUT
           echo -e "\033[32mNew release $SERVO_VERSION found, proceeding...\033[0m"
         fi
-    
+
     - name: Cache Servo release info
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
@@ -61,7 +61,7 @@ jobs:
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
         make org.servo.Servo.yml
-    
+
     - name: Validate generated manifest
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
@@ -83,9 +83,9 @@ jobs:
           echo -e "\033[31mError: SERVO_TAR_SHA256 placeholder not replaced\033[0m"
           exit 1
         fi
-        
+
         echo -e "\033[32m✓ Manifest validation passed\033[0m"
-    
+
     - name: Configure Git
       if: steps.check-release.outputs.release_exists == 'false'
       run: |
@@ -119,23 +119,24 @@ jobs:
         SERVO_NAME="${{ steps.check-release.outputs.servo_name }}"
         BRANCH="${{ env.RELEASE_BRANCH }}"
 
-        # Check if release branch exists, create if not
-        echo -e "\033[34mChecking if release branch \"${BRANCH}\" exists...\033[0m"
-        if git ls-remote --heads origin ${BRANCH} | grep " refs/heads/${BRANCH}\$" 2>/dev/null; then
-          echo -e "\033[34mRelease branch exists, checking out...\033[0m"
-          git fetch origin ${BRANCH}
-          git checkout ${BRANCH}
-        else
-          echo -e "\033[34mRelease branch does not exist, creating...\033[0m"
-          git checkout -b ${BRANCH}
-        fi
-        
         # Add the generated manifest
         echo -e "\033[34mAdding generated manifest to branch...\033[0m"
         git add dist/org.servo.Servo.yml
         git add dist/org.servo.Servo.yml.sha384sum
         git commit -m "Release $SERVO_VERSION" -m "Automated release for Servo $SERVO_NAME" -m "Generated manifest for Flatpak packaging."
-        
+
+        # Check if release branch exists, create if not
+        echo -e "\033[34mChecking if release branch \"${BRANCH}\" exists...\033[0m"
+        git ls-remote --heads origin ${BRANCH}
+        if git ls-remote --heads origin ${BRANCH} | grep "refs/heads/${BRANCH}\$" 2>/dev/null; then
+          echo -e "\033[34mRelease branch exists, checking out...\033[0m"
+          git fetch origin ${BRANCH}
+          git rebase origin/${BRANCH}
+        else
+          echo -e "\033[34mRelease branch does not exist, creating...\033[0m"
+          git checkout -b ${BRANCH}
+        fi
+
         # Tag the commit
         git tag -a "$SERVO_VERSION" -m "Servo $SERVO_NAME"
         
@@ -151,24 +152,21 @@ jobs:
         name: Servo ${{ steps.check-release.outputs.servo_name }}
         body: |
           Automated Flatpak manifest for Servo ${{ steps.check-release.outputs.servo_name }}
-          
+
           This release contains the `org.servo.Servo.yml` manifest file that can be used to build a Flatpak package of Servo.
-          
+
           **Upstream Release:** https://github.com/servo/servo/releases/tag/${{ steps.check-release.outputs.servo_version }}
-          
+
           ## Usage
-          
+
           To build and install the Flatpak:
-          
+
           ```bash
           curl -Ls -o org.servo.Servo.yml https://github.com/yookoala/servo-flatpak/releases/download/${{ steps.check-release.outputs.servo_version }}/org.servo.Servo.yml
-          echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check \
-            && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml \
-            || echo -e "\033[31mchecksum mismatch\033[0m"
+          echo "${{ steps.sha384sum.outputs.checksum }}" | sha384sum --check && flatpak-builder --user --install --force-clean build-dir org.servo.Servo.yml || echo -e "\033[31mchecksum mismatch\033[0m"
           ```
 
-          This will download the [manifest file][manifest-file]. And it will download the
-          [${{ steps.check-release.outputs.servo_version }} tag release from the upstream GitHub][upstream-github].
+          This will download the [manifest file][manifest-file]. And it will download the [${{ steps.check-release.outputs.servo_version }} tag release from the upstream GitHub][upstream-github].
 
           To run Servo after installation:
 
