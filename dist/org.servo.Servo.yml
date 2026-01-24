@@ -26,8 +26,8 @@ modules:
       - install -Dm0644 "resources/servo.svg" "${FLATPAK_DEST}/share/icons/scalable/apps/servo.svg"
     sources:
       - type: archive
-        url: https://github.com/servo/servo/releases/download/v0.0.3/servo-x86_64-linux-gnu.tar.gz
-        sha256: ab0edaa18a74025efd221c78ddbbf3e6eaea675dbc4613739dd1425bb60f00e1
+        url: https://github.com/servo/servo/releases/download/v0.0.4/servo-x86_64-linux-gnu.tar.gz
+        sha256: 131d99bca0739864098792385c17d789002bc0190325c390fa01d6297f5004a8
       - type: file
         path: org.servo.Servo.metainfo.xml
       - type: file
