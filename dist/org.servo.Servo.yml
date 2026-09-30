@@ -1,6 +1,6 @@
 id: org.servo.Servo
 runtime: org.freedesktop.Platform
-runtime-version: '25.08'
+runtime-version: '26.08'
 sdk: org.freedesktop.Sdk
 command: /app/bin/servo
 rename-icon: servo
@@ -26,8 +26,8 @@ modules:
       - install -Dm0644 "resources/servo.svg" "${FLATPAK_DEST}/share/icons/scalable/apps/servo.svg"
     sources:
       - type: archive
-        url: https://github.com/servo/servo/releases/download/v0.5.0/servo-x86_64-linux-gnu.tar.gz
-        sha256: 6a3d536b07bed16d4833012162cde5285740614d5ff2855dfc36e60576779170
+        url: https://github.com/servo/servo/releases/download/v0.6.0/servo-x86_64-linux-gnu.tar.gz
+        sha256: ad951ede1a1a73899b822c9464f6bdb3ec25b531b27cd806671d79ac8b6a60d0
       - type: file
         path: org.servo.Servo.metainfo.xml
       - type: file
